@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Image Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+        
+        .instructions {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 800px;
+            margin: 20px auto;
+            font-size: 0.95rem;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: #fdbb2d;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+        
+        code {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-auto-rows: 200px;
+            grid-auto-flow: dense;
+            grid-gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        .gallery-item .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 20px 15px 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .gallery-item:hover .overlay {
+            opacity: 1;
+        }
+        
+        .gallery-item .title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .gallery-item .desc {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .large {
+            grid-row: span 2;
+        }
+        
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+        
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        
+        .close-btn:hover {
+            opacity: 1;
+        }
+        
+        .counter {
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simple Image Gallery</h1>
+            <p class="subtitle">A lightweight gallery where you can easily add your own images</p>
+            
+            <div class="instructions">
+                <h3><i class="fas fa-info-circle"></i> How to add your images:</h3>
+                <ol>
+                    <li>Upload your images to your hosting server</li>
+                    <li>Replace the example images below with your own by editing the HTML</li>
+                    <li>For each image, replace the <code>src</code> attribute with your image URL</li>
+                    <li>Optionally add a title and description using the <code>data-title</code> and <code>data-desc</code> attributes</li>
+                </ol>
+                <p><strong>Example:</strong> <code>&lt;div class="gallery-item" data-title="Your Title" data-desc="Your Description"&gt;&lt;img src="your-image-url.jpg"&gt;&lt;/div&gt;</code></p>
+            </div>
+        </header>
+        
+        <div class="gallery">
+            <!-- Image 1 -->
+            <div class="gallery-item" data-title="Mountain Landscape" data-desc="Beautiful mountain view at sunset">
+                <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80">
+                <div class="overlay">
+                    <div class="title">Mountain Landscape</div>
+                    <div class="desc">Beautiful mountain view at sunset</div>
+                </div>
+            </div>
+            
+            <!-- Image 2 -->
+            <div class="gallery-item large" data-title="Ocean Waves" data-desc="Powerful ocean waves crashing on rocks">
+                <img src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80">
+                <div class="overlay">
+                    <div class="title">Ocean Waves</div>
+                    <div class="desc">Powerful ocean waves crashing on rocks</div>
+                </div>
+            </div>
+            
+            <!-- Image 3 -->
+            <div class="gallery-item" data-title="Autumn Forest" data-desc="Colorful autumn trees in the forest">
+                <img src="https://images.unsplash.com/photo-1476820865390-c52aeebb9891?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80">
+                <div class="overlay">
+                    <div class="title">Autumn Forest</div>
+                    <div class="desc">Colorful autumn trees in the forest</div>
+                </div>
+            </div>
+            
+            <!-- Image 4 -->
+            <div class="gallery-item" data-title="Desert Dunes" data-desc="Sand dunes in the desert">
+                <img src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80">
+                <div class="overlay">
+                    <div class="title">Desert Dunes</div>
+                    <div class="desc">Sand dunes in the desert</div>
+                </div>
+            </div>
+            
+            <!-- Image 5 -->
+            <div class="gallery-item large" data-title="Northern Lights" data-desc="Aurora borealis in the night sky">
+                <img src="https://images.unsplash.com/photo-1502136969935-8d8eef54d77b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80">
+                <div class="overlay">
+                    <div class="title">Northern Lights</div>
+                    <div class="desc">Aurora borealis in the night sky</div>
+                </div>
+            </div>
+            
+            <!-- Image 6 -->
+            <div class="gallery-item" data-title="Tropical Beach" data-desc="White sandy beach with palm trees">
+                <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80">
+                <div class="overlay">
+                    <div class="title">Tropical Beach</div>
+                    <div class="desc">White sandy beach with palm trees</div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Simple Image Gallery &copy; 2023 | Add your own images by replacing the image sources</p>
+        </footer>
+    </div>
+    
+    <!-- Lightbox for image preview -->
+    <div class="lightbox">
+        <div class="lightbox-content">
+            <img src="" alt="">
+            <span class="close-btn">&times;</span>
+            <div class="counter"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Lightbox functionality
+        const galleryItems = document.querySelectorAll('.gallery-item');
+        const lightbox = document.querySelector('.lightbox');
+        const lightboxImg = document.querySelector('.lightbox-content img');
+        const closeBtn = document.querySelector('.close-btn');
+        const counter = document.querySelector('.counter');
+        
+        // Open lightbox when clicking on gallery item
+        galleryItems.forEach((item, index) => {
+            item.addEventListener('click', () => {
+                const imgSrc = item.querySelector('img').src;
+                const title = item.getAttribute('data-title') || '';
+                const desc = item.getAttribute('data-desc') || '';
+                
+                lightboxImg.src = imgSrc;
+                lightboxImg.alt = title;
+                
+                // Update counter
+                counter.textContent = `${index + 1} of ${galleryItems.length}`;
+                
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+            });
+        });
+        
+        // Close lightbox
+        closeBtn.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        });
+        
+        // Close when clicking outside the image
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Close with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
+    </script>
+</body>
+</html>
